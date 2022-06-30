@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">shopup_bug_report</string>
+    <string name="record">RECORD</string>
+    <string name="stop">STOP</string>
+</resources>
