@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
+import android.media.MediaCodec
 import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
@@ -68,8 +69,8 @@ class MainActivity : AppCompatActivity() {
         override fun onStop() {
             if(toggleButton.isChecked){
                 toggleButton.isChecked=false
-                mediaRecorder!!.stop()
-                mediaRecorder!!.reset()
+                mediaRecorder?.stop()
+                mediaRecorder?.reset()
             }
             mediaProjection = null
             stopScreenRecord()
@@ -94,37 +95,37 @@ class MainActivity : AppCompatActivity() {
         DISPLAY_WIDTH = metrics.widthPixels
 
         toggleButton.setOnClickListener{v ->
-            if(ContextCompat.checkSelfPermission(this@MainActivity,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE) + ContextCompat.checkSelfPermission(this@MainActivity,
-                    Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED){
-                        if(ActivityCompat.shouldShowRequestPermissionRationale(this@MainActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                            || ActivityCompat.shouldShowRequestPermissionRationale(this@MainActivity, Manifest.permission.RECORD_AUDIO)) {
-                            toggleButton.isChecked = false
-                            Snackbar.make(rootLayout, "Permissions", Snackbar.LENGTH_INDEFINITE)
-                                .setAction("ENABLE", {
-                                    ActivityCompat.requestPermissions(
-                                        this@MainActivity,
-                                        arrayOf(
-                                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                            Manifest.permission.RECORD_AUDIO
-                                        ), REQUEST_PERMISSION
-                                    )
-                                }).show()
-                            }
-                        else{
-                            ActivityCompat.requestPermissions(
-                                this@MainActivity,
-                                arrayOf(
-                                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                    Manifest.permission.RECORD_AUDIO
-                                ), REQUEST_PERMISSION
-                            )
-                        }
-                    }
-            else{
-                startRecording(v)
-            }
-//            startRecording(v) // remove later
+//            if(ContextCompat.checkSelfPermission(this@MainActivity,
+//                    Manifest.permission.WRITE_EXTERNAL_STORAGE) + ContextCompat.checkSelfPermission(this@MainActivity,
+//                    Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED){
+//                        if(ActivityCompat.shouldShowRequestPermissionRationale(this@MainActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//                            || ActivityCompat.shouldShowRequestPermissionRationale(this@MainActivity, Manifest.permission.RECORD_AUDIO)) {
+//                            toggleButton.isChecked = false
+//                            Snackbar.make(rootLayout, "Permissions", Snackbar.LENGTH_INDEFINITE)
+//                                .setAction("ENABLE", {
+//                                    ActivityCompat.requestPermissions(
+//                                        this@MainActivity,
+//                                        arrayOf(
+//                                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+//                                            Manifest.permission.RECORD_AUDIO
+//                                        ), REQUEST_PERMISSION
+//                                    )
+//                                }).show()
+//                            }
+//                        else{
+//                            ActivityCompat.requestPermissions(
+//                                this@MainActivity,
+//                                arrayOf(
+//                                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+//                                    Manifest.permission.RECORD_AUDIO
+//                                ), REQUEST_PERMISSION
+//                            )
+//                        }
+//                    }
+//            else{
+//                startRecording(v)
+//            }
+            startRecording(v) // remove later
         }
 
 
@@ -143,39 +144,39 @@ class MainActivity : AppCompatActivity() {
 //        Log.i("TAG","HOST " + Build.HOST)
 //        Log.i("TAG","FINGERPRINT: "+ Build.FINGERPRINT)
 //        Log.i("TAG","Version Code: " + Build.VERSION.RELEASE)
-//        Log.i("TAG","INCREMENTAL " + Build.VERSION.INCREMENTAL)
+//        Log.i("TAG","INCREMENTAL " + Build.VERSION.INCREMENTAL)INCREMENTAL
 
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        when(requestCode){
-            REQUEST_PERMISSION->{
-                if(grantResults.size > 0 && grantResults[0] + grantResults[1] == PackageManager.PERMISSION_GRANTED)
-                    startRecording(toggleButton)
-                else{
-                    toggleButton.isChecked = false
-                    Snackbar.make(rootLayout, "Permissions", Snackbar.LENGTH_INDEFINITE)
-                        .setAction("ENABLE", {
-                            val intent = Intent()
-                            intent.action = Settings.ACTION_APPLICATION_SETTINGS
-                            intent.addCategory(Intent.CATEGORY_DEFAULT)
-                            intent.data = Uri.parse("package:$packageName")
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                            intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                            startActivity(intent)
-
-                        }).show()
-
-                }
-                return
-            }
-        }
-    }
+//    override fun onRequestPermissionsResult(
+//        requestCode: Int,
+//        permissions: Array<out String>,
+//        grantResults: IntArray
+//    ) {
+//        when(requestCode){
+//            REQUEST_PERMISSION->{
+//                if(grantResults.size > 0 && grantResults[0] + grantResults[1] == PackageManager.PERMISSION_GRANTED)
+//                    startRecording(toggleButton)
+//                else{
+//                    toggleButton.isChecked = false
+//                    Snackbar.make(rootLayout, "Permissions", Snackbar.LENGTH_INDEFINITE)
+//                        .setAction("ENABLE", {
+//                            val intent = Intent()
+//                            intent.action = Settings.ACTION_APPLICATION_SETTINGS
+//                            intent.addCategory(Intent.CATEGORY_DEFAULT)
+//                            intent.data = Uri.parse("package:$packageName")
+//                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+//                            intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+//                            startActivity(intent)
+//
+//                        }).show()
+//
+//                }
+//                return
+//            }
+//        }
+//    }
     private fun startRecording(v: View?){
         if((v as ToggleButton).isChecked){
             initRecorder()
@@ -228,8 +229,13 @@ class MainActivity : AppCompatActivity() {
             mediaRecorder!!.setAudioSource(MediaRecorder.AudioSource.MIC)
             mediaRecorder!!.setVideoSource(MediaRecorder.VideoSource.SURFACE)
             mediaRecorder!!.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+            mediaRecorder!!.setAudioSamplingRate(16000)
+//            val surface: Surface = MediaCodec.createPersistentInputSurface()
+//            mediaRecorder!!.setInputSurface(surface)
 
-            videoUri = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+//            var cacheDir = getCacheDir()
+//            videoUri = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            videoUri = getCacheDir()
                 .toString() + StringBuilder("/")
                 .append("shopup_")
                 .append(SimpleDateFormat("dd-mm-yyyy-hh_mm_ss").format(Date()))
